@@ -6,7 +6,10 @@
 
     <groupId>tool</groupId>
     <artifactId>sms-verification</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${project.version}</version>
 
+    <properties>
+        <project.version>1.0-SNAPSHOT</project.version>
+    </properties>
 
 </project>
