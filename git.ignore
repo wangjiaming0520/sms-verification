@@ -1,0 +1,10 @@
+target
+*.class
+.settings
+.classpath
+.project
+
+### FOR IDEA
+.idea
+*.iml
+*.war
