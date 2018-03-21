@@ -2,13 +2,11 @@ package tool.sms.verification.buffer;
 
 public interface Buffer {
 
-    boolean add(String key, long duration);
+    boolean addTransient(String key, long duration);
 
-    String delete(String key);
+    String getAndDelete(String key);
 
-    String get(String key);
+    int getAndIncrementTransientByDay(String key);
 
-    int getAndIncrement(String key);
-
-    boolean set(String key, String value, long duration);
+    boolean setTransient(String key, String value, long duration);
 }

@@ -51,13 +51,13 @@ public class SmsValidator {
     }
 
     public String sendRandomCode(String mobile) throws Exception {
-        if (this.buffer.add(this.getLockKey(mobile), this.sendInterval)) {
-            if (this.buffer.getAndIncrement(this.getSendCountKey(mobile)) > this.maximumSendCountPerDay) {
+        if (this.buffer.addTransient(this.getLockKey(mobile), this.sendInterval)) {
+            if (this.buffer.getAndIncrementTransientByDay(this.getSendCountKey(mobile)) >= this.maximumSendCountPerDay) {
                 throw new Exception("The number of sending times has reached the upper limit today.");
             }
 
             String randomCode = this.randomCodeGenerator.generate();
-            this.buffer.set(this.getRandomCodeKey(mobile), randomCode, this.verifyCodeExpireTime);
+            this.buffer.setTransient(this.getRandomCodeKey(mobile), randomCode, this.verifyCodeExpireTime);
             String content = new String(this.contentTemplate);
             content.replaceAll(this.randomCodePlaceHolder, randomCode);
 
@@ -70,7 +70,7 @@ public class SmsValidator {
     }
 
     public boolean validateRandomCode(String mobile, String randomCode) {
-        String correct = this.buffer.delete(this.getRandomCodeKey(mobile));
+        String correct = this.buffer.getAndDelete(this.getRandomCodeKey(mobile));
         return randomCode.equals(correct);
     }
 
