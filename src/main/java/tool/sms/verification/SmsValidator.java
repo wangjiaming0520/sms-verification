@@ -1,7 +1,9 @@
 package tool.sms.verification;
 
 import tool.sms.verification.buffer.Buffer;
+import tool.sms.verification.exception.SmsSendFailureException;
 import tool.sms.verification.generator.RandomCodeGenerator;
+import tool.sms.verification.sender.Sender;
 
 public class SmsValidator {
 
@@ -31,6 +33,11 @@ public class SmsValidator {
     private final RandomCodeGenerator randomCodeGenerator;
 
     /**
+     * 短信发送器
+     */
+    private final Sender sender;
+
+    /**
      * 文本模板
      */
     private final String contentTemplate;
@@ -40,20 +47,21 @@ public class SmsValidator {
      */
     private final String randomCodePlaceHolder;
 
-    protected SmsValidator(long verifyCodeExpireTime, long sendInterval, int maximumSendCountPerDay, Buffer buffer, RandomCodeGenerator randomCodeGenerator, String contentTemplate, String randomCodePlaceHolder) {
+    protected SmsValidator(long verifyCodeExpireTime, long sendInterval, int maximumSendCountPerDay, Buffer buffer, RandomCodeGenerator randomCodeGenerator, Sender sender, String contentTemplate, String randomCodePlaceHolder) {
         this.verifyCodeExpireTime = verifyCodeExpireTime;
         this.sendInterval = sendInterval;
         this.maximumSendCountPerDay = maximumSendCountPerDay;
         this.buffer = buffer;
         this.randomCodeGenerator = randomCodeGenerator;
+        this.sender = sender;
         this.contentTemplate = contentTemplate;
         this.randomCodePlaceHolder = randomCodePlaceHolder;
     }
 
-    public String sendRandomCode(String mobile) throws Exception {
+    public String sendRandomCode(String mobile) throws SmsSendFailureException {
         if (this.buffer.addTransient(this.getLockKey(mobile), this.sendInterval)) {
             if (this.buffer.getAndIncrementTransientByDay(this.getSendCountKey(mobile)) >= this.maximumSendCountPerDay) {
-                throw new Exception("The number of sending times has reached the upper limit today.");
+                throw new SmsSendFailureException("The number of sending times has reached the upper limit today.");
             }
 
             String randomCode = this.randomCodeGenerator.generate();
@@ -61,11 +69,11 @@ public class SmsValidator {
             String content = new String(this.contentTemplate);
             content.replaceAll(this.randomCodePlaceHolder, randomCode);
 
-            // TODO Send SMS
+            this.sender.send(mobile, content);
 
             return randomCode;
         } else {
-            throw new Exception("Send too often, please try later.");
+            throw new SmsSendFailureException("Send too often, please try later.");
         }
     }
 

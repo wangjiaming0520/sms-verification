@@ -6,7 +6,7 @@ public interface Buffer {
 
     String getAndDelete(String key);
 
-    int getAndIncrementTransientByDay(String key);
+    long getAndIncrementTransientByDay(String key);
 
     boolean setTransient(String key, String value, long duration);
 }

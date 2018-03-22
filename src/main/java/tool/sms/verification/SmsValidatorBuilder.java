@@ -3,11 +3,12 @@ package tool.sms.verification;
 import tool.sms.verification.buffer.Buffer;
 import tool.sms.verification.generator.DefaultRandomCodeGenerator;
 import tool.sms.verification.generator.RandomCodeGenerator;
+import tool.sms.verification.sender.Sender;
 
 public class SmsValidatorBuilder {
 
-    private static final long DEFAULT_VERIFY_CODE_EXPIRE_TIME = 5 * 60 * 1000L; // 5min
-    private static final long DEFAULT_SEND_INTERVAL = 60 * 1000L; // 1min
+    private static final long DEFAULT_VERIFY_CODE_EXPIRE_TIME = 5 * 60 * 1000L;
+    private static final long DEFAULT_SEND_INTERVAL = 60 * 1000L;
     private static final int DEFAULT_MAXIMUM_SEND_COUNT_PER_DAY = 5;
 
     private static final Class<? extends RandomCodeGenerator> DEFAULT_RANDOM_CODE_GENERATOR = DefaultRandomCodeGenerator.class;
@@ -38,6 +39,11 @@ public class SmsValidatorBuilder {
     private RandomCodeGenerator randomCodeGenerator;
 
     /**
+     * 短信发送器
+     */
+    private Sender sender;
+
+    /**
      * 文本模板
      */
     private String contentTemplate;
@@ -57,10 +63,13 @@ public class SmsValidatorBuilder {
         if (this.buffer == null) {
             throw new Exception("buffer is null.");
         }
+        if (this.sender == null) {
+            throw new Exception("sender is null.");
+        }
         if (this.randomCodeGenerator == null) {
             this.randomCodeGenerator = DEFAULT_RANDOM_CODE_GENERATOR.newInstance();
         }
-        return new SmsValidator(this.verifyCodeExpireTime, this.sendInterval, this.maximumSendCountPerDay, this.buffer, this.randomCodeGenerator, this.contentTemplate, this.randomCodePlaceHolder);
+        return new SmsValidator(verifyCodeExpireTime, sendInterval, maximumSendCountPerDay, buffer, randomCodeGenerator, sender, contentTemplate, randomCodePlaceHolder);
     }
 
     public SmsValidatorBuilder verifyCodeExpireTime(long verifyCodeExpireTime) {
@@ -85,6 +94,11 @@ public class SmsValidatorBuilder {
 
     public SmsValidatorBuilder randomCodeGenerator(RandomCodeGenerator randomCodeGenerator) {
         this.randomCodeGenerator = randomCodeGenerator;
+        return this;
+    }
+
+    public SmsValidatorBuilder sender(Sender sender) {
+        this.sender = sender;
         return this;
     }
 
