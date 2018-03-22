@@ -47,7 +47,7 @@ public class SmsValidator {
      */
     private final String randomCodePlaceHolder;
 
-    protected SmsValidator(long verifyCodeExpireTime, long sendInterval, int maximumSendCountPerDay, Buffer buffer, RandomCodeGenerator randomCodeGenerator, Sender sender, String contentTemplate, String randomCodePlaceHolder) {
+    SmsValidator(long verifyCodeExpireTime, long sendInterval, int maximumSendCountPerDay, Buffer buffer, RandomCodeGenerator randomCodeGenerator, Sender sender, String contentTemplate, String randomCodePlaceHolder) {
         this.verifyCodeExpireTime = verifyCodeExpireTime;
         this.sendInterval = sendInterval;
         this.maximumSendCountPerDay = maximumSendCountPerDay;
@@ -66,8 +66,7 @@ public class SmsValidator {
 
             String randomCode = this.randomCodeGenerator.generate();
             this.buffer.setTransient(this.getRandomCodeKey(mobile), randomCode, this.verifyCodeExpireTime);
-            String content = new String(this.contentTemplate);
-            content.replaceAll(this.randomCodePlaceHolder, randomCode);
+            String content = new String(this.contentTemplate).replaceAll(this.randomCodePlaceHolder, randomCode);
 
             this.sender.send(mobile, content);
 
